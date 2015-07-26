@@ -37,6 +37,7 @@
       glProgram = null,
       fragmantShader = null,
       vertexShader = null;
+      angle = 0;
 
       var vertexPositionAttribute = null,
       trianglesVerticeBuffer = null;
@@ -54,10 +55,17 @@
            }
 
            if(gl){
-            setupWebGL();
+            
             initShaders();
             setupBuffers();
-            drawScene();
+            (function animLoop(){
+              setupWebGL();  
+              setupDynamicBuffers();
+              drawScene(); 
+              requestAnimationFrame(animLoop,canvas); 
+            })();
+
+            
            }else{
               alert("Error. your browser does not apper to support Webgl");
            }
@@ -69,8 +77,8 @@
         gl.clearColor(0.1,0.5,0.1,1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        //gl.viewport(0,0,canvas.width,canvas.height);
-        gl.viewport(0, canvas.height/2.0,canvas.width/2.0,canvas.height/2.0);
+        gl.viewport(0,0,canvas.width,canvas.height);
+        //gl.viewport(0, canvas.height/2.0,canvas.width/2.0,canvas.height/2.0);
       }
 
       function initShaders()
@@ -112,20 +120,6 @@
 
       function setupBuffers()
       {
-        var triangleVertices = [
-          -0.5, 0.5, 0.0,
-           0.0, 0.0, 0.0,
-          -0.5, -0.5, 0.0,
-
-          0.5, 0.5, 0.0,
-          0.0, 0.0, 0.0,
-          0.5, -0.5, 0.0
-        ]
-
-        trianglesVerticeBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices),gl.STATIC_DRAW);
-
         var triangleVerticeColors = [
           1.0, 0.0, 0.0,
           1.0, 1.0, 1.0,
@@ -134,13 +128,32 @@
           0.0, 0.0, 1.0,
           1.0, 1.0, 1.0,
           0.0, 0.0, 1.0
-        ]
+        ];
 
          trianglesColorBuffer = gl.createBuffer();
          gl.bindBuffer(gl.ARRAY_BUFFER, trianglesColorBuffer);
          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(
           triangleVerticeColors), gl.STATIC_DRAW); 
-       }
+      }
+
+      function setupDynamicBuffers()
+      {
+        var x_translation = Math.sin(angle)/2.0;
+        var triangleVertices = [
+          -0.5 + x_translation, 0.5, 0.0,
+           0.0 + x_translation, 0.0, 0.0,
+          -0.5 + x_translation, -0.5, 0.0,
+
+          0.5 + x_translation, 0.5, 0.0,
+          0.0 + x_translation, 0.0, 0.0,
+          0.5 + x_translation, -0.5, 0.0
+        ];
+        angle += 0.01;  
+        trianglesVerticeBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices),gl.DYNAMIC_DRAW);
+
+      } 
 
       function drawScene()
       {
