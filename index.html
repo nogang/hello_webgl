@@ -10,8 +10,13 @@
     <!-- Vertex shader program -->
     <script id="shader-vs" type="x-shader/x-vertex">
       attribute vec3 aVertexPosition;
+      attribute vec3 aVetexColor;
+
+      varying highp vec4 vColor;
       void main(void){
         gl_Position = vec4(aVertexPosition, 1.0);
+        vColor = vec4(aVetexColor,1.0);
+
       }
     </script>
 
@@ -19,8 +24,10 @@
     <!-- Fragment shader program -->
 
     <script id="shader-fs" type="x-shader/x-fragment">
+        varying highp vec4 vColor;
         void main(void) {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            gl_FragColor = vColor;
         }
     </script>
 
@@ -33,6 +40,8 @@
 
       var vertexPositionAttribute = null,
       trianglesVerticeBuffer = null;
+      vertexColorAttribute = null;
+      trianglesColorBuffer = null;
 
       function initWebGL()
       {
@@ -105,7 +114,7 @@
       {
         var triangleVertices = [
           -0.5, 0.5, 0.0,
-           0.5, 0.0, 0.0,
+           0.0, 0.0, 0.0,
           -0.5, -0.5, 0.0,
 
           0.5, 0.5, 0.0,
@@ -116,7 +125,22 @@
         trianglesVerticeBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices),gl.STATIC_DRAW);
-      }
+
+        var triangleVerticeColors = [
+          1.0, 0.0, 0.0,
+          1.0, 1.0, 1.0,
+          1.0, 0.0, 0.0,
+
+          0.0, 0.0, 1.0,
+          1.0, 1.0, 1.0,
+          0.0, 0.0, 1.0
+        ]
+
+         trianglesColorBuffer = gl.createBuffer();
+         gl.bindBuffer(gl.ARRAY_BUFFER, trianglesColorBuffer);
+         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(
+          triangleVerticeColors), gl.STATIC_DRAW); 
+       }
 
       function drawScene()
       {
@@ -124,6 +148,14 @@
         gl.enableVertexAttribArray(vertexPositionAttribute);
         gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
         gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT,false,0,0);
+
+        vertexColorAttribute = gl.getAttribLocation(glProgram,
+          "aVetexColor");
+        gl.enableVertexAttribArray(vertexColorAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesColorBuffer);
+        gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 0, 0);
+
+
         gl.drawArrays(gl.TRIANGLES, 0,6);
       }
 
