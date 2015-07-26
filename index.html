@@ -1,0 +1,138 @@
+
+<html>
+  <head>
+    <title>WebGL Demo</title>
+    <style>
+      body{background-color: grey;}
+      canvas{background-color: white;}
+    </style>
+
+    <!-- Vertex shader program -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+      void main(void){
+        gl_Position = vec4(aVertexPosition, 1.0);
+      }
+    </script>
+
+
+    <!-- Fragment shader program -->
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+        void main(void) {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    </script>
+
+    <script>
+      var gl = null,
+      canvas = null,
+      glProgram = null,
+      fragmantShader = null,
+      vertexShader = null;
+
+      var vertexPositionAttribute = null,
+      trianglesVerticeBuffer = null;
+
+      function initWebGL()
+      {
+           canvas = document.getElementById("glcanvas");
+           try{
+             gl = canvas.getContext("webgl") ||
+             canvas.getContext("experimental-webgl");
+           }catch(e){
+
+           }
+
+           if(gl){
+            setupWebGL();
+            initShaders();
+            setupBuffers();
+            drawScene();
+           }else{
+              alert("Error. your browser does not apper to support Webgl");
+           }
+      }
+
+      function setupWebGL()
+      {
+        //clear color is green
+        gl.clearColor(0.1,0.5,0.1,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+
+      function initShaders()
+      {
+        var fs_source = document.getElementById("shader-fs").innerHTML,
+        vs_source = document.getElementById("shader-vs").innerHTML;
+
+        vertexShader = makeShader(vs_source, gl.VERTEX_SHADER);
+        fragmentShader = makeShader(fs_source, gl.FRAGMENT_SHADER);
+
+        glProgram = gl.createProgram();
+
+        gl.attachShader(glProgram, vertexShader);
+        gl.attachShader(glProgram, fragmentShader);
+
+        gl.linkProgram(glProgram);
+
+        if(!gl.getProgramParameter(glProgram, gl.LINK_STATUS))
+        {
+          alert("ling error");
+        }
+
+        gl.useProgram(glProgram);
+
+      }
+
+      function makeShader(src, type)
+      {
+        var shader = gl.createShader(type);
+        gl.shaderSource(shader, src);
+        gl.compileShader(shader);
+
+        if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+          alert("compile error");
+        }
+
+        return shader;
+      }
+
+      function setupBuffers()
+      {
+        var triangleVertices = [
+          -0.5, 0.5, 0.0,
+           0.5, 0.0, 0.0,
+          -0.5, -0.5, 0.0,
+
+          0.5, 0.5, 0.0,
+          0.0, 0.0, 0.0,
+          0.5, -0.5, 0.0
+        ]
+
+        trianglesVerticeBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices),gl.STATIC_DRAW);
+      }
+
+      function drawScene()
+      {
+        vertexPositionAttribute = gl.getAttribLocation(glProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(vertexPositionAttribute);
+        gl.bindBuffer(gl.ARRAY_BUFFER, trianglesVerticeBuffer);
+        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT,false,0,0);
+        gl.drawArrays(gl.TRIANGLES, 0,6);
+      }
+
+
+
+    </script>
+
+  </head>
+
+  <body onload="initWebGL()">
+    <canvas id="glcanvas" width="640" height="480">
+      Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+    </canvas>
+  </body>
+</html>
